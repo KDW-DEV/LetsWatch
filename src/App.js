@@ -4,7 +4,8 @@ import axios from "axios";
 import uniqid from "uniqid";
 import qs from "querystring";
 import Chat from "./components/Chat";
-const socket = socketIOClient("http://localhost:3000");
+socket = socketIOClient("/");
+//const socket = socketIOClient("http://localhost:3000");
 
 const App = () => {
   let [room, setRoom] = useState("");
