@@ -4,7 +4,7 @@ import axios from "axios";
 import uniqid from "uniqid";
 import qs from "querystring";
 import Chat from "./components/Chat";
-socket = socketIOClient("/");
+const socket = socketIOClient("/");
 //const socket = socketIOClient("http://localhost:3000");
 
 const App = () => {
