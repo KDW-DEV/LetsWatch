@@ -1,7 +1,6 @@
 import React, { useEffect, useState } from "react";
 import socketIOClient from "socket.io-client";
 import ChatInput from "./ChatInput";
-const socket = socketIOClient("http://localhost:3000");
 
 const Chat = () => {
   const [chatHistory, setChatHistory] = useState([]);

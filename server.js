@@ -17,12 +17,19 @@ app.get("/", (req, res, next) => {
 });
 
 io.on("connection", (socket) => {
-  console.log("a user connected");
-  socket.on("message", (msg) => {
-    io.emit("message", msg);
+  socket.on("joinRoom", (data) => {
+    //handle when socket creates a room, or goes to link to a room
+    socket.join(data.room);
+    socket.room = data.room;
+    console.log("current room:", socket.room);
+
+    io.in(socket.room).emit("userJoinedRoom", {
+      message: "A new user has joined the room.",
+      totalUsers: io.sockets.adapter.rooms[socket.room].length,
+    });
   });
   socket.on("disconnect", () => {
-    console.log("user disconnected");
+    io.in(socket.room).emit("userDisconnect");
   });
 });
 
