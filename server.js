@@ -28,6 +28,29 @@ io.on("connection", (socket) => {
       totalUsers: io.sockets.adapter.rooms[socket.room].length,
     });
   });
+  socket.on("PLAY", () => {
+    socket.to(socket.room).emit("PLAY");
+  });
+
+  socket.on("PAUSE", () => {
+    socket.to(socket.room).emit("PAUSE");
+  });
+
+  socket.on("SYNC_TIME", (currentTime) => {
+    socket.to(socket.room).emit("SYNC_TIME", currentTime);
+  });
+
+  socket.on("NEW_VIDEO", (videoURL) => {
+    io.to(socket.room).emit("NEW_VIDEO", videoURL);
+  });
+
+  socket.on("ASK_FOR_VIDEO_INFORMATION", () => {
+    socket.to(socket.room).emit("ASK_FOR_VIDEO_INFORMATION");
+  });
+
+  socket.on("SYNC_VIDEO_INFORMATION", (data) => {
+    io.to(socket.room).emit("SYNC_VIDEO_INFORMATION", data);
+  });
   socket.on("disconnect", () => {
     io.in(socket.room).emit("userDisconnect");
   });

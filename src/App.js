@@ -4,6 +4,7 @@ import axios from "axios";
 import uniqid from "uniqid";
 import qs from "querystring";
 import Chat from "./components/Chat";
+import VideoPlayer from "./components/VideoPlayer";
 const socket = socketIOClient("/");
 //const socket = socketIOClient("http://localhost:3000");
 
@@ -15,7 +16,6 @@ const App = () => {
     if (window.location.hash) {
       console.log("here be the hash! ");
       setRoom(qs.parse(window.location.hash.slice(1)).room);
-      console.log("no hash?" + qs.parse(window.location.hash.slice(1)).room);
       socket.emit("joinRoom", {
         room: qs.parse(window.location.hash.slice(1)).room,
       });
@@ -49,6 +49,7 @@ const App = () => {
       {room && (
         <div>
           <h1 style={{ textAlign: "center" }}>localhost:3000/{room}</h1>
+          <VideoPlayer socket={socket} />
           <h4>Number of users in room: {users}</h4>
         </div>
       )}
