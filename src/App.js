@@ -48,9 +48,13 @@ const App = () => {
     <div>
       {room && (
         <div>
-          <h1 style={{ textAlign: "center" }}>localhost:3000/{room}</h1>
+          <h1 style={{ textAlign: "center" }}>
+            https://letswatchthis.herokuapp.com/{room}
+          </h1>
+          <h4 style={{ textAlign: "center" }}>
+            Number of users in room: {users}
+          </h4>
           <VideoPlayer socket={socket} />
-          <h4>Number of users in room: {users}</h4>
         </div>
       )}
       {!room && (

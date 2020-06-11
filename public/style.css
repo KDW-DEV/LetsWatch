@@ -36,3 +36,9 @@ form button {
 #messages li:nth-child(odd) {
   background: #eee;
 }
+
+.playerHolder {
+  display: flex;
+  flex-flow: column nowrap;
+  align-items: center;
+}

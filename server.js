@@ -32,8 +32,8 @@ io.on("connection", (socket) => {
     socket.to(socket.room).emit("PLAY");
   });
 
-  socket.on("PAUSE", () => {
-    socket.to(socket.room).emit("PAUSE");
+  socket.on("PAUSE", (currentTime) => {
+    socket.to(socket.room).emit("PAUSE", currentTime);
   });
 
   socket.on("SYNC_TIME", (currentTime) => {
