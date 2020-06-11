@@ -21,13 +21,12 @@ io.on("connection", (socket) => {
     //handle when socket creates a room, or goes to link to a room
     socket.join(data.room);
     socket.room = data.room;
-    console.log("current room:", socket.room);
 
-    io.in(socket.room).emit("userJoinedRoom", {
-      message: "A new user has joined the room.",
-      totalUsers: io.sockets.adapter.rooms[socket.room].length,
-    });
+    console.log("current room:", socket.room, "current socket: ", socket.id);
+
+    //socket.to(socket.room).emit("ASK_FOR_VIDEO_INFORMATION");
   });
+
   socket.on("PLAY", () => {
     socket.to(socket.room).emit("PLAY");
   });
@@ -45,11 +44,13 @@ io.on("connection", (socket) => {
   });
 
   socket.on("ASK_FOR_VIDEO_INFORMATION", () => {
+    console.log("onAsk socket asking: ", socket.id);
     socket.to(socket.room).emit("ASK_FOR_VIDEO_INFORMATION");
   });
 
   socket.on("SYNC_VIDEO_INFORMATION", (data) => {
-    io.to(socket.room).emit("SYNC_VIDEO_INFORMATION", data);
+    console.log("onSyncVideo socket: ", socket.id);
+    socket.to(socket.room).emit("SYNC_VIDEO_INFORMATION", data);
   });
   socket.on("disconnect", () => {
     io.in(socket.room).emit("userDisconnect");
