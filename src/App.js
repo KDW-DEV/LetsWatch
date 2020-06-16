@@ -5,7 +5,9 @@ import uniqid from "uniqid";
 import qs from "querystring";
 import Chat from "./components/Chat";
 import VideoPlayer from "./components/VideoPlayer";
+import { disconnect } from "process";
 //const socket = socketIOClient("http://localhost:3000");
+const socket = socketIOClient({ transports: ["websocket"], upgrade: false });
 
 const App = () => {
   let [room, setRoom] = useState("");
@@ -27,7 +29,7 @@ const App = () => {
     setRoom(newRoom);
   };
 
-  console.log(room);
+  console.log("new room: ", room);
 
   return (
     <div>
@@ -39,7 +41,7 @@ const App = () => {
           <h4 style={{ textAlign: "center" }}>
             Number of users in room: {users}
           </h4>
-          <VideoPlayer room={room} />
+          <VideoPlayer socket={socket} room={room} />
         </div>
       )}
       {!room && (

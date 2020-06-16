@@ -40,11 +40,11 @@ io.on("connection", (socket) => {
   });
 
   socket.on("NEW_VIDEO", (videoURL) => {
-    io.to(socket.room).emit("NEW_VIDEO", videoURL);
+    socket.to(socket.room).emit("NEW_VIDEO", videoURL);
   });
 
   socket.on("ASK_FOR_VIDEO_INFORMATION", () => {
-    console.log("onAsk socket asking: ", socket.id);
+    console.log("onAsk, socket asking: ", socket.id);
     socket.to(socket.room).emit("ASK_FOR_VIDEO_INFORMATION");
   });
 
@@ -53,6 +53,9 @@ io.on("connection", (socket) => {
     socket.to(socket.room).emit("SYNC_VIDEO_INFORMATION", data);
   });
   socket.on("disconnect", () => {
+    console.log("disconnected socket :", socket.id);
+    socket.leave(socket.room);
+    socket.removeAllListeners();
     io.in(socket.room).emit("userDisconnect");
   });
 });

@@ -15,9 +15,7 @@ const opts = {
   },
 };
 
-const VideoPlayer = ({ room }) => {
-  //Socket
-  let [socket, setSocket] = useState();
+const VideoPlayer = ({ room, socket }) => {
   //URL submit handlers
   let [videoURL, setVideoURL] = useState(
     "https://www.youtube.com/watch?v=CNjZ1GKZXmc",
@@ -30,25 +28,56 @@ const VideoPlayer = ({ room }) => {
 
   useEffect(() => {
     console.log("useEffect!", playerRef);
-    const socket = socketIOClient("/");
-    setSocket(socket);
+    socket.emit("joinRoom", {
+      room: room,
+    });
+    console.log("socket joined room, socket obj :", socket);
+    console.log("current URL :", videoURL);
 
-    socket.on("connect", () => {
-      if (room) {
-        console.log("joinedRoom");
-        socket.emit("joinRoom", {
-          room: room,
-        });
-      } else {
-        console.log("joinedRoom");
+    socket.emit("ASK_FOR_VIDEO_INFORMATION");
 
-        socket.emit("joinRoom", {
-          room: qs.parse(window.location.hash.slice(1)).room,
-        });
+    socket.on("PAUSE", (currentTime) => {
+      console.log("Recieved PAUSE");
+      syncTime(currentTime);
+      setPlaying(false);
+    });
+
+    socket.on("PLAY", () => {
+      console.log("Recieved PLAY");
+      setPlaying(true);
+    });
+
+    socket.on("SYNC_TIME", (currentTime) => {
+      syncTime(currentTime);
+    });
+
+    socket.on("NEW_VIDEO", (data) => {
+      if (data !== videoURL) {
+        console.log("new video acquired :", data);
+        setVideoURL(data);
       }
-      console.log("CONNECTED");
-      socketFunctions(socket);
-      socket.emit("ASK_FOR_VIDEO_INFORMATION");
+    });
+
+    socket.on("ASK_FOR_VIDEO_INFORMATION", () => {
+      console.log(videoURL);
+      let data = {
+        url: playerRef.current.player.props.url,
+        currentTime: playerRef.current.getCurrentTime(),
+      };
+      console.log("recieved request, data to send :", data);
+      socket.emit("SYNC_VIDEO_INFORMATION", data);
+    });
+
+    socket.on("SYNC_VIDEO_INFORMATION", (data) => {
+      console.log("got data :", data);
+      if (data.url !== videoURL) {
+        setVideoURL(data.url);
+        syncTime(data.currentTime);
+        console.log("URL set and time synced");
+      } else if (data.url == videoURL) {
+        console.log("playing same URL, syncing time");
+        syncTime(data.currentTime);
+      }
     });
   }, []);
 
@@ -57,8 +86,8 @@ const VideoPlayer = ({ room }) => {
   const ready = (e) => {
     console.log("player is ready. player object: ", playerRef.current);
     const currentURL = playerRef.current.player.props.url;
-    console.log(videoURL);
-    socketFunctions(socket);
+    //console.log(videoURL);
+    setPlaying(true);
   };
 
   const pause = (e) => {
@@ -77,68 +106,20 @@ const VideoPlayer = ({ room }) => {
 
   //Socket on Functions
 
-  const socketFunctions = (socket) => {
-    console.log("socket object: ", socket);
-
-    socket.on("PLAY", () => {
-      console.log("onPlay");
+  const syncTime = (currentTime) => {
+    if (
+      playerRef.current.getCurrentTime() < currentTime - 0.5 ||
+      playerRef.current.getCurrentTime() > currentTime + 0.5
+    ) {
+      console.log("Time synced to :", currentTime);
+      playerRef.current.seekTo(currentTime);
       setPlaying(true);
-    });
-
-    socket.on("PAUSE", (currentTime) => {
-      console.log("onPause");
-
-      syncTime(currentTime);
-
-      setPlaying(false);
-    });
-
-    socket.on("NEW_VIDEO", (data) => {
-      console.log("old url", videoURL);
-      console.log("onNewVideo", data);
-
-      setVideoURL(data);
-    });
-
-    socket.on("SYNC_TIME", (currentTime) => {
-      console.log("onSyncTime");
-      syncTime(currentTime);
-    });
-
-    socket.on("ASK_FOR_VIDEO_INFORMATION", () => {
-      console.log("Received request!!");
-      const data = {
-        url: videoURL,
-        currentTime: playerRef.current.getCurrentTime(),
-        playing: true,
-      };
-      console.log("data to send: ", data);
-      socket.emit("SYNC_VIDEO_INFORMATION", data);
-    });
-
-    socket.on("SYNC_VIDEO_INFORMATION", (data) => {
-      console.log("Data received! Syncing data...");
-      console.log(data);
-      setVideoURL(data.url);
-      syncTime(data.currentTime);
-      setPlaying(true);
-    });
-
-    const syncTime = (currentTime) => {
-      if (
-        playerRef.current.getCurrentTime() < currentTime - 0.5 ||
-        playerRef.current.getCurrentTime() > currentTime + 0.5
-      ) {
-        console.log("Time synced!");
-        playerRef.current.seekTo(currentTime);
-        setPlaying(true);
-      }
-    };
+    }
   };
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    console.log("newVideo submit", socket);
+    setVideoURL(formURL);
     socket.emit("NEW_VIDEO", formURL);
     setFormURL("");
   };
@@ -163,19 +144,7 @@ const VideoPlayer = ({ room }) => {
           width={"90vw"}
           height={"75vh"}
         />
-        <h3>{}</h3>
-        <button
-          type="button"
-          onClick={() => {
-            playerRef.current.seekTo(
-              playerRef.current.getCurrentTime() + 10,
-              "seconds",
-            );
-            setPlaying(true);
-          }}
-        >
-          +10 sec
-        </button>
+        <h3>Current URL : {videoURL}</h3>
       </div>
       <form onSubmit={handleSubmit}>
         <input
