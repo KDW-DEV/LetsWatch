@@ -24,6 +24,11 @@ io.on("connection", (socket) => {
 
     console.log("current room:", socket.room, "current socket: ", socket.id);
 
+    io.in(socket.room).emit(
+      "getCount",
+      io.sockets.adapter.rooms[socket.room].sockets,
+    );
+
     //socket.to(socket.room).emit("ASK_FOR_VIDEO_INFORMATION");
   });
 
@@ -53,10 +58,15 @@ io.on("connection", (socket) => {
     socket.to(socket.room).emit("SYNC_VIDEO_INFORMATION", data);
   });
   socket.on("disconnect", () => {
+    if (io.sockets.adapter.rooms[socket.room]) {
+      io.in(socket.room).emit(
+        "getCount",
+        io.sockets.adapter.rooms[socket.room].sockets,
+      );
+    }
     console.log("disconnected socket :", socket.id);
     socket.leave(socket.room);
     socket.removeAllListeners();
-    io.in(socket.room).emit("userDisconnect");
   });
 });
 

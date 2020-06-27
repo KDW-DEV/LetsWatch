@@ -18,11 +18,11 @@ const opts = {
 const VideoPlayer = ({ room, socket }) => {
   //URL submit handlers
   let [videoURL, setVideoURL] = useState(
-    "https://www.youtube.com/watch?v=CNjZ1GKZXmc",
+    "https://www.youtube.com/watch?v=O4ldpyIE5t4",
   );
   let [formURL, setFormURL] = useState("");
   //Player Controls
-  let [playing, setPlaying] = useState(false);
+  let [playing, setPlaying] = useState(true);
   //Player Ref
   let playerRef = useRef();
 
@@ -62,7 +62,7 @@ const VideoPlayer = ({ room, socket }) => {
       console.log(videoURL);
       let data = {
         url: playerRef.current.player.props.url,
-        currentTime: playerRef.current.getCurrentTime(),
+        currentTime: playerRef.current.getCurrentTime() + 1,
       };
       console.log("recieved request, data to send :", data);
       socket.emit("SYNC_VIDEO_INFORMATION", data);
@@ -87,6 +87,10 @@ const VideoPlayer = ({ room, socket }) => {
     console.log("player is ready. player object: ", playerRef.current);
     const currentURL = playerRef.current.player.props.url;
     //console.log(videoURL);
+    // setTimeout(() => {
+    //   setPlaying(true);
+    //   console.log("delayed start");
+    // }, 1500);
     setPlaying(true);
   };
 
@@ -129,7 +133,7 @@ const VideoPlayer = ({ room, socket }) => {
   };
 
   return (
-    <div>
+    <div style={{ color: "white" }}>
       <div className="playerHolder">
         <ReactPlayer
           className="player"
@@ -144,7 +148,7 @@ const VideoPlayer = ({ room, socket }) => {
           width={"90vw"}
           height={"75vh"}
         />
-        <h3>Current URL : {videoURL}</h3>
+        <h3 style={{ color: "white" }}>Current URL : {videoURL}</h3>
       </div>
       <form onSubmit={handleSubmit}>
         <input
