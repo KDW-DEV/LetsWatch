@@ -62,7 +62,7 @@ const App = () => {
           <h4 style={{ color: "white", textAlign: "center" }}>
             Number of users in room: {userCount}
           </h4>
-          <VideoPlayer socket={socket} room={room} />
+          <VideoPlayer users={userCount} socket={socket} room={room} />
         </div>
       )}
       {!room && (

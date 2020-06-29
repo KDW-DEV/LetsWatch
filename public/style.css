@@ -74,3 +74,8 @@ form button {
   height: 100vh;
   background-color: #121212;
 }
+
+.playerControls {
+  display: flex;
+  flex-flow: row wrap;
+}

@@ -28,6 +28,7 @@
     "react": "^16.13.0",
     "react-dom": "^16.13.0",
     "react-player": "^2.2.0",
+    "react-tiny-link": "^3.5.0",
     "react-youtube": "^7.11.2",
     "reactstrap": "^8.5.1",
     "socket.io": "^2.3.0",

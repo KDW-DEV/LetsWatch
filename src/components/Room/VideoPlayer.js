@@ -1,5 +1,6 @@
 import React, { useEffect, useState, useRef } from "react";
 import ReactPlayer from "react-player";
+import { Input, Label } from "reactstrap";
 import socketIOClient from "socket.io-client";
 import qs from "querystring";
 
@@ -20,11 +21,13 @@ const VideoPlayer = ({ room, socket }) => {
   let [videoURL, setVideoURL] = useState(
     "https://www.youtube.com/watch?v=O4ldpyIE5t4",
   );
+  let [queue, setQueue] = useState([]);
   let [formURL, setFormURL] = useState("");
   //Player Controls
   let [playing, setPlaying] = useState(true);
   //Player Ref
   let playerRef = useRef();
+  let [videoProps, setVideoProps] = useState({});
 
   useEffect(() => {
     console.log("useEffect!", playerRef);
@@ -48,6 +51,7 @@ const VideoPlayer = ({ room, socket }) => {
     });
 
     socket.on("SYNC_TIME", (currentTime) => {
+      console.log("Asked to sync!");
       syncTime(currentTime);
     });
 
@@ -104,8 +108,9 @@ const VideoPlayer = ({ room, socket }) => {
   };
 
   const seek = (e) => {
+    console.log("seek", e.target.value);
+    playerRef.current.seekTo(e.target.value, seconds);
     socket.emit("SYNC_TIME", playerRef.current.getCurrentTime());
-    socket.emit("PLAY");
   };
 
   //Socket on Functions
@@ -120,6 +125,8 @@ const VideoPlayer = ({ room, socket }) => {
       setPlaying(true);
     }
   };
+
+  const checkQueue = () => {};
 
   const handleSubmit = (e) => {
     e.preventDefault();
@@ -141,20 +148,22 @@ const VideoPlayer = ({ room, socket }) => {
           onPause={pause}
           onPlay={play}
           onSeek={seek}
+          onEnded={checkQueue}
           playing={playing}
           ref={playerRef}
           url={videoURL}
-          volume={0.2}
           width={"90vw"}
           height={"75vh"}
+          controls={true}
         />
+
         <h3 style={{ color: "white" }}>Current URL : {videoURL}</h3>
       </div>
       <form onSubmit={handleSubmit}>
         <input
           className="white-text"
           type="text"
-          placeholder="Insert Youtube link"
+          placeholder="Insert video link into queue"
           id="videoUrl"
           value={formURL}
           onChange={handleChange}
