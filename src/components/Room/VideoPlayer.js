@@ -128,31 +128,30 @@ const VideoPlayer = ({ room, socket, users }) => {
   };
 
   const checkQueue = () => {
+    console.log("video ended, running check on queue...", queue);
     if (queue.length == 0) {
       console.log("No more videos in queue");
     } else {
-      if (ReactPlayer.canPlay(queue[0])) {
-        console.log("Video can be played, loading now...");
-        setVideoURL(queue[0]);
-        socket.emit("NEW_VIDEO", queue[0]);
-        let newQueue = queue;
-        newQueue.shift();
-        setQueue(newQueue);
-      }
+      console.log("Video in queue, loading now...");
+      setVideoURL(queue[0]);
+      socket.emit("NEW_VIDEO", queue[0]);
+      let newQueue = queue;
+      newQueue.shift();
+      setQueue([...newQueue]);
+      console.log("queue array updated: ", queue);
     }
   };
 
   const handleSkip = () => {
     console.log("skip pressed");
     setSkips(skip++);
-    if (skip >= users / 2 || skip == users) {
+    if (skip >= users / 2) {
       console.log("can skip, skipping...");
       setVideoURL(queue[0]);
       socket.emit("NEW_VIDEO", queue[0]);
       let newQueue = queue;
       newQueue.shift();
       setQueue(newQueue);
-      console.log("queue set to newQueue : ", queue[0]);
     }
   };
 
