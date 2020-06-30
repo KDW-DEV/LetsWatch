@@ -1,6 +1,6 @@
 import React, { useEffect, useState, useRef } from "react";
 import ReactPlayer from "react-player";
-import { Input, Label } from "reactstrap";
+import { Input, Label, Button } from "reactstrap";
 import socketIOClient from "socket.io-client";
 import qs from "querystring";
 
@@ -16,7 +16,7 @@ const opts = {
   },
 };
 
-const VideoPlayer = ({ room, socket }) => {
+const VideoPlayer = ({ room, socket, users }) => {
   //URL submit handlers
   let [videoURL, setVideoURL] = useState(
     "https://www.youtube.com/watch?v=O4ldpyIE5t4",
@@ -25,6 +25,7 @@ const VideoPlayer = ({ room, socket }) => {
   let [formURL, setFormURL] = useState("");
   //Player Controls
   let [playing, setPlaying] = useState(true);
+  let [skip, setSkips] = useState(0);
   //Player Ref
   let playerRef = useRef();
   let [videoProps, setVideoProps] = useState({});
@@ -126,12 +127,40 @@ const VideoPlayer = ({ room, socket }) => {
     }
   };
 
-  const checkQueue = () => {};
+  const checkQueue = () => {
+    if (queue.length == 0) {
+      console.log("No more videos in queue");
+    } else {
+      if (ReactPlayer.canPlay(queue[0])) {
+        console.log("Video can be played, loading now...");
+        setVideoURL(queue[0]);
+        socket.emit("NEW_VIDEO", queue[0]);
+        let newQueue = queue;
+        newQueue.shift();
+        setQueue(newQueue);
+      }
+    }
+  };
+
+  const handleSkip = () => {
+    console.log("skip pressed");
+    setSkips(skip++);
+    if (skip >= users / 2 || skip == users) {
+      console.log("can skip, skipping...");
+      setVideoURL(queue[0]);
+      socket.emit("NEW_VIDEO", queue[0]);
+      let newQueue = queue;
+      newQueue.shift();
+      setQueue(newQueue);
+      console.log("queue set to newQueue : ", queue[0]);
+    }
+  };
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    setVideoURL(formURL);
-    socket.emit("NEW_VIDEO", formURL);
+    let newQueue = queue;
+    newQueue.push(formURL);
+    setQueue(newQueue);
     setFormURL("");
   };
 
@@ -159,6 +188,24 @@ const VideoPlayer = ({ room, socket }) => {
 
         <h3 style={{ color: "white" }}>Current URL : {videoURL}</h3>
       </div>
+      <h4>
+        Video Queue - Status :
+        {queue && queue.length > 0 ? (
+          <span> Playing video</span>
+        ) : (
+          <span> Queue empty</span>
+        )}
+      </h4>
+      <ul>
+        {queue.map((video) => {
+          return <li key={Math.random()}>{video}</li>;
+        })}
+      </ul>
+      {queue.length > 0 && (
+        <Button onClick={handleSkip} className="createbutton">
+          Skip Video ({skip}/{users})
+        </Button>
+      )}
       <form onSubmit={handleSubmit}>
         <input
           className="white-text"
